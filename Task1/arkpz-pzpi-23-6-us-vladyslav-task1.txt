@@ -1,0 +1,530 @@
+МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ
+УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+Кафедра «Програмна інженерія»
+
+Звіт
+з лабораторної роботи №1
+з дисципліни «Аналіз та рефакторинг коду»
+
+Виконав: ​
+
+Прийняв:
+
+ст. гр. ПЗПІ-23-6
+Ус В. М.​
+
+​
+
+​
+​
+
+​
+
+​
+
+​
+
+​
+​
+
+Харків 2025
+
+асистент кафедри ПІ
+Дашенков Д. С.
+
+Посилання на відеозапис: https://youtu.be/p310JQ0oBWk
+Посилання на репозиторій: https://github.com/NureUsVladyslav/ark-pzpi-23-6-us-vladyslav
+
+Vision and Scope Document
+for
+
+Програмна система для
+безпеки житла
+Version 1.0 approved
+
+Prepared by Ус Владислав
+
+ПЗПІ-23-6
+
+ХНУРЕ
+
+21.12.2025
+
+Copyright © 1999 by Karl E. Wiegers. Permission is granted to use, modify, and distribute this document.
+
+Vision and Scope for SecureSpace
+
+Page 2
+
+Table of Contents
+Table of Contents
+Revision History
+1. Business Requirements
+1.1.
+Background
+1.2.
+Business Opportunity
+1.3.
+Business Objectives and Success Criteria
+1.4.
+Customer or Market Needs
+1.5.
+Business Risks
+2. Vision of the Solution
+2.1.
+Vision Statement
+2.2.
+Major Features
+2.3.
+Assumptions and Dependencies
+3. Scope and Limitations
+3.1.
+Scope of Initial Release
+3.2.
+Scope of Subsequent Releases
+3.3.
+Limitations and Exclusions
+4. Business Context
+4.1.
+Stakeholder Profiles
+4.2.
+Project Priorities
+4.3.
+Operating Environment
+
+Error! Bookmark not defined.
+2
+2
+1
+1
+1
+2
+2
+2
+2
+2
+3
+3
+4
+4
+Error! Bookmark not defined.
+4
+5
+5
+6
+
+Revision History
+Name
+
+Date
+
+Reason For Changes
+
+Version
+
+Vision and Scope for SecureSpace
+
+1.
+
+Business Requirements
+
+1.1.
+
+Background
+
+Page 1
+
+Сучасні умови життя зумовлюють зростання потреби у підвищенні рівня безпеки
+житлових приміщень. Власники квартир, приватних будинків і невеликих офісів
+стикаються з ризиками несанкціонованого доступу та втрати майна. Традиційні засоби
+захисту, зокрема механічні замки або автономні сигналізації, не забезпечують достатнього
+рівня контролю, оскільки не дозволяють здійснювати постійний моніторинг і оперативно
+реагувати на події.
+На ринку існують різні рішення у сфері безпеки житла, однак значна їх частина є
+складною у використанні або потребує дорогого обладнання, що обмежує їх доступність
+для масового користувача. Крім того, багато аналогів характеризуються обмеженою
+гнучкістю та відсутністю зручного централізованого керування.
+У зв’язку з цим виникає необхідність у створенні програмної системи для безпеки житла,
+яка забезпечує зручний та доступний контроль стану приміщення. Основна ідея розробки
+полягає у наданні користувачеві можливості своєчасно отримувати інформацію про
+підозрілі події та контролювати рівень безпеки незалежно від місця перебування.
+Метою створення програмного продукту є підвищення рівня захищеності житла та
+зменшення ризиків, пов’язаних із несвоєчасним реагуванням на загрози. Продукт має
+забезпечити користувачеві додаткову цінність завдяки зручності, надійності та
+можливості подальшого розвитку.
+
+1.2.
+
+Business Opportunity
+
+Ринок систем безпеки житла представлений як класичними охоронними сервісами, так і
+програмно-апаратними рішеннями у сфері “розумного дому”. До основних аналогів
+можна віднести комерційні охоронні системи з підключенням до пульта охорони, а також
+популярні платформи розумного дому, що включають функції моніторингу руху та стану
+дверей і вікон. Такі рішення зазвичай орієнтовані на комплексне використання та
+потребують спеціалізованого обладнання, професійного монтажу або щомісячної
+абонентської плати.
+Аналіз існуючих аналогів показує, що їх ключовими недоліками є висока вартість
+впровадження, складність налаштування для кінцевого користувача та обмежена гнучкість
+у масштабуванні. Багато систем є закритими екосистемами, що ускладнює інтеграцію з
+іншими сервісами або адаптацію під індивідуальні потреби користувача. У результаті
+частина потенційних споживачів відмовляється від використання таких продуктів або
+обмежується мінімальними засобами захисту.
+Запропонований програмний продукт відрізняється від аналогів орієнтацією на доступний
+і зрозумілий підхід до безпеки житла. Система фокусується на базових сценаріях захисту,
+
+Vision and Scope for SecureSpace
+
+Page 2
+
+що є найбільш актуальними для більшості користувачів, без надмірної складності та
+залежності від дорогих апаратних рішень. Це робить продукт привабливим для масового
+ринку житлової нерухомості та невеликих офісних приміщень.
+Проєкт орієнтований на ринок приватних користувачів та малого бізнесу, який є
+перспективним з огляду на зростання попиту на доступні цифрові сервіси безпеки.
+Можливими моделями монетизації є використання базового функціоналу безкоштовно з
+подальшим підключенням платних розширених можливостей, підписка на додаткові
+сервіси або корпоративні пакети для невеликих організацій. Таким чином,
+запропонований продукт має чітко визначену ринкову нішу та потенціал для стабільного
+отримання прибутку.
+
+1.3.
+
+Business Objectives and Success Criteria
+
+<Describe the important business objectives of the product in a way that is quantitative and
+measurable. The value provided to customers is described in section 1.4, so this section should
+focus on the value provided to the business. This could include estimates of revenue or cost
+savings, return on investment analysis, or target release dates. Determine how success will be
+defined and measured on this project, and describe the factors that are likely to have the greatest
+impact on achieving that success. Include things within the direct control of the organization, as
+well as external factors. Establish measurable criteria to assess whether the business objectives
+have been met.>
+
+1.4.
+
+Customer or Market Needs
+
+<Describe the needs of typical customers or market segments, including needs that are not yet
+met by the marketplace or by existing systems. You may wish to describe problems customers
+currently encounter that the new product will (or will not) address and how the product would be
+used by customers. Identify the customer hardware and software environment in which the
+product must operate. Define at a high level any known critical interface or performance
+requirements. Avoid including any design or implementation details. Present the requirements in
+a numbered list so that more detailed user or functional requirements can be traced to them.>
+
+1.5.
+
+Business Risks
+
+<Summarize the major business risks associated with developing this product, such as
+marketplace competition, timing issues, user acceptance, implementation issues, or possible
+negative impacts on the business. Estimate the severity of the risks and identify any risk mitigation
+actions that could be taken.>
+
+2.
+
+Vision of the Solution
+
+2.1.
+
+Vision Statement
+
+Метою проєкту є створення доступної та надійної програмної системи, яка змінює підхід
+до забезпечення безпеки житла шляхом використання цифрових технологій та
+централізованого контролю. Після впровадження продукту користувачі отримають
+можливість почуватися впевнено щодо стану свого житлового або робочого простору
+
+Vision and Scope for SecureSpace
+
+Page 3
+
+незалежно від місця перебування, маючи постійний доступ до актуальної інформації про
+безпеку.
+Концепція проєкту ґрунтується на поєднанні простоти використання, гнучкості та
+орієнтації на реальні потреби масового користувача. Система покликана задовольнити
+інтереси різних груп клієнтів — від приватних осіб до власників невеликих офісів —
+водночас підтримуючи стратегічні цілі розвитку продукту та можливість його подальшого
+масштабування.
+Запропоноване бачення враховує сучасні ринкові тенденції цифровізації та зростання
+попиту на доступні рішення у сфері безпеки, а також обмеження щодо ресурсів і витрат.
+Проєкт орієнтований на довгостроковий розвиток і формує основу для прийняття
+узгоджених рішень протягом усього життєвого циклу програмного продукту.
+
+2.2.
+
+Major Features
+
+MF-1: Моніторинг стану житлового приміщення – система надає користувачеві актуальну
+інформацію про стан приміщення на основі подій від датчиків руху та відкриття дверей і
+вікон.
+MF-2: Сповіщення про підозрілі події – система автоматично інформує користувача у разі
+виявлення несанкціонованих або підозрілих дій у приміщенні.
+MF-3: Керування режимом охорони – користувач має можливість активувати або
+деактивувати режим охорони залежно від поточної ситуації.
+MF-4: Перегляд історії подій – система зберігає та надає користувачеві доступ до історії
+подій для аналізу стану приміщення за певний період часу.
+MF-5: Управління доступом користувачів – система забезпечує можливість керування
+правами доступу користувачів до функцій програмного продукту.
+MF-6: Вбудовані засоби адміністрування системи – програмна система включає
+інструменти для управління користувачами та даними, створення резервних копій,
+експорту та імпорту налаштувань, а також управління сертифікатами безпеки.
+MF-7: Простота та зручність використання (відмінна особливість) – система орієнтована
+на масового користувача та не потребує складних налаштувань або дорогих рішень.
+
+2.3.
+
+Assumptions and Dependencies
+
+<Record any assumptions that were made when conceiving the project and writing this vision and
+scope document. Note any major dependencies the project must rely upon for success, such as
+specific technologies, third-party vendors, development partners, or other business
+relationships.>
+
+Vision and Scope for SecureSpace
+
+3.
+
+Scope and Limitations
+
+3.1.
+
+Scope of Initial Release
+
+Page 4
+
+F1: Прийом та обробка подій від IoT-клієнтів – серверна частина забезпечує прийом подій
+від IoT-клієнтів, їх базову обробку та збереження інформації про події безпеки.
+F2: Збір даних з датчиків руху та відкриття дверей і вікон – IoT-клієнт забезпечує
+взаємодію з датчиками руху та відкриття дверей і вікон, фіксацію подій та передачу
+відповідних даних на сервер.
+F3: Управління режимом охорони – серверна частина підтримує активацію та деактивацію
+режиму охорони, який впливає на обробку та інтерпретацію отриманих подій.
+F4: Формування та зберігання журналу подій – система забезпечує ведення журналу подій
+безпеки з можливістю подальшого аналізу стану приміщення.
+F5: Автентифікація та авторизація користувачів – серверна частина реалізує базові
+механізми автентифікації та розмежування доступу користувачів до системи.
+F6: Захист персональних даних – система забезпечує базовий рівень захисту персональних
+даних користувачів відповідно до вимог безпеки.
+F7: Вбудовані засоби адміністрування – серверна частина надає можливість управління
+користувачами та даними системи, створення резервних копій, експорту та імпорту
+налаштувань і даних, а також управління сертифікатами безпеки.
+F8: Базова підтримка локалізації – система передбачає можливість використання різних
+мовних налаштувань з урахуванням подальшого розширення.
+
+3.2.
+
+Limitations and Exclusions
+
+F1: Перегляд стану системи безпеки – веб- та мобільний клієнти забезпечують
+відображення поточного стану житлового приміщення, активного режиму охорони та
+останніх зафіксованих подій.
+F2: Перегляд журналу подій – користувач має можливість переглядати історію подій
+безпеки з фільтрацією за часовими періодами.
+F3: Керування режимом охорони – клієнтські застосунки дозволяють дистанційно
+активувати або деактивувати режим охорони приміщення.
+F4: Отримання сповіщень про події – веб- та мобільні клієнти забезпечують отримання
+сповіщень про події безпеки для своєчасного реагування.
+
+Vision and Scope for SecureSpace
+
+Page 5
+
+F5: Управління обліковим записом користувача – користувач може переглядати та
+змінювати основні налаштування свого облікового запису.
+F6: Підтримка локалізації інтерфейсу – клієнтські застосунки підтримують використання
+різних мов інтерфейсу.
+
+4.
+
+Business Context
+
+<This section summarizes some of the business issues around the project, including profiles of
+major customer categories, assumptions that went into the project concept, and the management
+priorities for the project.>
+
+4.1.
+
+Stakeholder Profiles
+
+<Stakeholders are individuals, groups, or organizations that are actively involved in a project, are
+affected by its outcome, or can influence its outcome. The stakeholder profiles identify the
+customers for this product and other stakeholders, and states their major interests in the product.
+Characterize business-level customers, target market segments, and different user classes, to
+reduce the likelihood of unexpected requirements surfacing later that cannot be accommodated
+because of schedule or scope constraints. For each stakeholder category, the profile includes the
+major value or benefits they will receive from the product, their likely attitudes toward the product,
+major features and characteristics of interest, and any known constraints that must be
+accommodated. Examples of stakeholder value include:
+improved productivity
+reduced rework
+cost savings
+streamlined business processes
+automation of previously manual tasks
+ability to perform entirely new tasks or functions
+conformance to current standards or regulations
+improved usability or reduced frustration level compared to current applications
+
+●
+●
+●
+●
+●
+●
+●
+●
+
+Example:>
+
+Stakeholder
+
+Major
+Value
+
+executives
+
+increased
+revenue
+
+editors
+
+fewer errors
+in work
+
+legal aides
+
+quick access
+to data
+
+Attitudes
+
+Major Interests
+
+Constraints
+
+see product as
+avenue to 25%
+increase in market
+share
+highly receptive, but
+expect high usability
+
+richer feature set than
+competitors; time to
+market
+
+maximum
+budget = $1.4M
+
+automatic error
+correction; ease of use;
+high reliability
+ability to handle much
+larger database than
+current system; easy to
+learn
+
+must run on lowend
+workstations
+no budget for
+retraining
+
+resistant unless
+product is keystrokecompatible with
+current system
+
+Vision and Scope for SecureSpace
+
+4.2.
+
+Page 6
+
+Project Priorities
+
+<Describe the priorities among the project’s requirements, schedule, and budget. The table below
+may be helpful in identifying the parameters around the project’s key drivers (top priority
+objectives), constraints to work within, and dimensions that can be balanced against each other
+to achieve the drivers within the known constraints. For more information, see chapter 2 of
+Creating a Software Engineering Culture by Karl E. Wiegers (Dorset House, 1996). Examples:>
+Dimension
+Schedule
+
+Driver
+(state objective)
+
+Constraint
+(state limits)
+
+release 1.0 to be
+available by 10/1,
+release 1.1 by 12/1
+
+Features
+
+70-80% of high priority
+features must be included in
+release 1.0
+90-95% of user acceptance
+tests must pass for release
+1.0, 95-98% for release 1.1
+
+Quality
+
+Staff
+
+maximum team size is
+6 developers + 4
+testers
+budget overrun up to 15%
+acceptable without executive
+review
+
+Cost
+
+4.3.
+
+Degree of Freedom
+(state allowable range)
+
+Operating Environment
+
+Програмна система працює у розподіленому клієнт-серверному середовищі та складається
+із серверної частини, IoT-модуля, веб-клієнта та мобільного клієнта.
+Серверна частина відповідає за обробку запитів клієнтських застосунків, реалізацію
+бізнес-логіки системи та доступ до даних. Взаємодія між компонентами системи
+здійснюється за допомогою REST API.
+IoT-модуль забезпечує генерацію подій від датчиків руху та відкриття дверей і вікон і
+передає ці події на серверну частину для подальшої обробки та збереження.
+Веб- та мобільний клієнти забезпечують доступ користувачів до функціональності
+системи з різних пристроїв. Користувачі можуть бути географічно розподілені та
+знаходитися у різних часових поясах, тому доступ до системи повинен бути можливим у
+будь-який час.
+Дані генеруються IoT-модулем, передаються через мережу на сервер та централізовано
+зберігаються у базі даних. Клієнтські застосунки отримують доступ до даних виключно
+через серверну частину, що забезпечує узгодженість та цілісність інформації.
+
+Vision and Scope for SecureSpace
+
+Page 7
+
+Час відповіді серверної частини для типових операцій не повинен перевищувати 1
+секунди. Короткочасні перебої в роботі системи допускаються, але не повинні призводити
+до втрати даних або порушення їх цілісності.
+Контроль доступу до системи здійснюється за допомогою механізмів автентифікації та
+авторизації. Передавання даних між компонентами системи виконується через захищені
+з’єднання. Дані користувачів зберігаються з дотриманням вимог безпеки та цілісності.
+Технології:
+
+
+
+
+
+
+Серверна частина: Node.js, Express, TypeScript
+База даних: PostgreSQL
+IoT-компонент: IoT-модуль
+Веб-клієнт: React, TypeScript
+Мобільний клієнт: Kotlin (Android)
+
+
