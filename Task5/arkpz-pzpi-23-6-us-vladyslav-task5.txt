@@ -1,0 +1,275 @@
+﻿МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ 
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ
+УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+ 
+Кафедра «Програмна інженерія»
+ 
+
+
+ 
+Звіт
+з лабораторної роботи №5
+з дисципліни «Аналіз та рефакторинг коду»
+
+
+ 
+
+
+ 
+Виконав:                                                                                Прийняв:
+ст. гр. ПЗПІ-23-6                                                                 асистент кафедри ПІ 
+Ус В. М.                                                              Дашенков Д. С.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Харків 2025
+1 ЗАВДАННЯ
+1.1 Мета роботи
+Навчитися розгортати програмну систему, перевіряти її функціональність, виконувати налаштування, а також демонструвати та документувати роботу системи.
+
+
+
+
+________________
+
+
+2 ХІД РОБОТИ
+2.1 Текстовий опис інженерних рішень
+Система безпеки житла розгортається у локальному середовищі з використанням контейнеризації Docker. Серверна частина, база даних та допоміжні сервіси запускаються в ізольованих контейнерах, що забезпечує стабільність середовища, зручність розробки та можливість подальшого масштабування.
+Для взаємодії IoT-модулів із серверною частиною використовується HTTP-протокол з передачею даних у форматі JSON. Оскільки емуляція IoT-пристроїв виконується у хмарному середовищі, а сервер працює локально, для забезпечення мережевого з’єднання застосовується сервіс ngrok, який створює тимчасовий публічний доступ до локального backend-сервера.
+2.2 Фрагменти програмного коду
+
+
+  async backupDatabase() {
+    const backupsDir = path.resolve(process.cwd(), "backups");
+    fs.mkdirSync(backupsDir, { recursive: true });
+
+
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const fileName = `backup-${stamp}.sql`;
+    const filePath = path.join(backupsDir, fileName);
+
+
+    const {
+      POSTGRES_DB,
+      POSTGRES_USER,
+      POSTGRES_PASSWORD,
+      POSTGRES_CONTAINER,
+    } = process.env;
+
+
+    if (!POSTGRES_DB || !POSTGRES_USER || !POSTGRES_PASSWORD) {
+      throw new AppError("BACKUP_FAILED", 500, {
+        reason: "ENV_NOT_SET",
+        missing: [
+          !POSTGRES_DB ? "POSTGRES_DB" : null,
+          !POSTGRES_USER ? "POSTGRES_USER" : null,
+          !POSTGRES_PASSWORD ? "POSTGRES_PASSWORD" : null,
+        ].filter(Boolean),
+      });
+    }
+
+
+    const container = POSTGRES_CONTAINER || "postgres";
+
+
+    const innerCommand =
+      `PGPASSWORD="${POSTGRES_PASSWORD}" ` +
+      `pg_dump --username="${POSTGRES_USER}" ` +
+      `--format=plain --no-owner --no-privileges "${POSTGRES_DB}"`;
+
+
+    await new Promise<void>((resolve, reject) => {
+      const dump = spawn(
+        "docker",
+        ["exec", "-i", container, "sh", "-lc", innerCommand],
+        { windowsHide: true }
+      );
+
+
+      dump.on("error", (err) => {
+        reject(
+          new AppError("BACKUP_FAILED", 500, {
+            reason: "DOCKER_EXEC_FAILED",
+            message: err.message,
+          })
+        );
+      });
+
+
+      const out = fs.createWriteStream(filePath);
+      dump.stdout.pipe(out);
+
+
+      let errText = "";
+      dump.stderr.on("data", (d) => (errText += d.toString()));
+
+
+      dump.on("close", (code) => {
+        if (code !== 0) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch {}
+
+
+          return reject(
+            new AppError("BACKUP_FAILED", 500, {
+              reason: "PG_DUMP_FAILED",
+              code,
+              stderr: errText,
+            })
+          );
+        }
+        resolve();
+      });
+    });
+
+
+    return {
+      ok: true,
+      file: fileName,
+    };
+  }
+}
+Даний фрагмент коду реалізує механізм резервного копіювання бази даних PostgreSQL у контейнеризованому середовищі Docker. Під час виконання методу створюється окрема директорія для збереження резервних копій, а ім’я файлу формується автоматично на основі поточної дати та часу. Параметри підключення до бази даних (назва БД, користувач, пароль) зчитуються зі змінних середовища, що забезпечує гнучкість конфігурації та підвищує безпеку. Для створення резервної копії використовується утиліта pg_dump, яка запускається безпосередньо всередині Docker-контейнера з базою даних. Результат виконання команди зберігається у файл формату SQL у локальній файловій системі. У разі виникнення помилки процес резервного копіювання коректно переривається з поверненням повідомлення про причину збою. 
+void sendMotionEvent() {
+  String url = BASE_URL + "/iot/" + SENSOR_ID + "/events";
+  String body = "{}";
+
+
+  Serial.println("Sending MOTION event");
+
+
+  HTTPClient http;
+  if (!http.begin(url)) {
+    Serial.println(" http.begin failed");
+    return;
+  }
+
+
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("X-Device-Secret", DEVICE_SECRET);
+
+
+  int code = http.POST(body);
+
+
+  Serial.print("HTTP ");
+  Serial.println(code);
+
+
+  if (code > 0) {
+    Serial.println(http.getString());
+  }
+
+
+  http.end();
+}
+
+
+void setup() {
+  Serial.begin(115200);
+  delay(300);
+
+
+  connectWiFi();
+
+
+  Serial.println("\n=== MOTION SENSOR READY ===");
+  Serial.println("Type:");
+  Serial.println("  m + Enter  -> MOTION");
+}
+
+
+void loop() {
+  if (Serial.available()) {
+    char cmd = Serial.read();
+
+
+    if (cmd == 'm' || cmd == 'M') {
+      sendMotionEvent();
+    }
+  }
+}
+
+
+Даний фрагмент коду реалізує логіку емуляції датчика руху в середовищі ESP32. При введенні символу m у послідовний порт (Serial Monitor) ініціюється відправлення події руху на серверну частину системи. Запит формується у вигляді HTTP POST-повідомлення з передачею даних у форматі JSON. Для автентифікації датчика використовується секретний ключ, який передається у заголовку X-Device-Secret. Сервер обробляє запит та повертає код відповіді, який виводиться у консоль для контролю результату. 
+async function handleAlertIfNeeded(args: { roomId: string; eventId: string }) {
+  const { roomId, eventId } = args;
+
+
+  const roomRepo = db.getRepository(Room);
+  const alertRepo = db.getRepository(Alert);
+  const memberRepo = db.getRepository(RoomMember);
+  const notifRepo = db.getRepository(Notification);
+
+
+  const room = await roomRepo.findOne({ where: { id: roomId } as any });
+  if (!room) return;
+
+
+  if (!room.isArmed) return;
+
+
+  const activeAlert = await alertRepo.findOne({
+    where: { roomId, status: "OPEN" as any } as any,
+  });
+  if (activeAlert) return;
+
+
+  const alertToSave: DeepPartial<Alert> = {
+    roomId,
+    eventId,
+    status: "OPEN" as any,
+    closedAt: null,
+    closedByUserId: null,
+  };
+
+
+  const savedAlert = await alertRepo.save(alertToSave);
+
+
+  const members = await memberRepo.find({ where: { roomId } as any });
+
+
+  const notificationsToSave: DeepPartial<Notification>[] = members.map((m) => ({
+    userId: m.userId,
+    roomId,
+    alertId: savedAlert.id,
+    message: "У кімнаті зафіксовано спрацювання датчика. Тривогу увімкнено.",
+    status: "PENDING" as any,
+    readAt: null,
+  }));
+
+
+  if (notificationsToSave.length > 0) {
+    await notifRepo.save(notificationsToSave);
+  }
+}
+Даний фрагмент коду реалізує логіку автоматичного створення тривоги в межах кімнати на основі події від датчика. Функція перевіряє, чи існує відповідна кімната та чи активований у ній режим охорони. У разі, якщо тривога вже активна, нова тривога не створюється, що запобігає дублюванню сповіщень. При виконанні всіх умов створюється новий запис тривоги, пов’язаний із подією датчика. Після цього система визначає всіх користувачів, які мають доступ до кімнати, та формує для них повідомлення. Сповіщення зберігаються зі статусом очікування та можуть бути доставлені користувачам іншими компонентами системи.
+2.3 Графічні ілюстрації
+  
+
+Рисунок 2.1 - Схема взаємодії компонентів програмної системи
+2.4 Посилання на відеозапис на YouTube.
+Посилання за відеозапис: https://youtu.be/nisXiG_LCFQ 
+Посилання на репозиторій: https://github.com/SecureSpaceProject/secure-space-backend 
+
+
+https://github.com/NureUsVladyslav/ark-pzpi-23-6-us-vladyslav
